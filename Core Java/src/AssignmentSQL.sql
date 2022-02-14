@@ -61,11 +61,6 @@ mysql> select * from customers WHERE RATING = 100;
 +------+---------+--------+--------+------+
 3) Find the largest order taken by each salesperson on each date.
 
-
-
-
-
-
 4) Arrange the Order table by descending customer number.
 mysql> select * from orders Order by CNUM DESC;
 +------+---------+------------+------+------+
