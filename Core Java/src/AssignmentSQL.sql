@@ -112,14 +112,19 @@ mysql> select SNAME  from salespeople,customers  where Customers.SNUM=salespeopl
 | RifKin  |
 +---------+
 7) Find the names and numbers of all salespeople who have more than one customer.
-
-
-
-
+mysql> SELECT s.SNUM ,SNAME FROM salespeople s ,customers c WHERE s.SNUM=c.SNUM AND c.SNUM>1;
++------+---------+
+| SNUM | SNAME   |
++------+---------+
+| 1001 | Peel    |
+| 1003 | AxelRod |
+| 1002 | Serres  |
+| 1002 | Serres  |
+| 1001 | Peel    |
+| 1004 | Motika  |
+| 1007 | RifKin  |
++------+---------+
 8) Count the orders of each of the salespeople and output the results in descending order.
-
-
-
 9) List the customer table if and only if one or more of the customers in the Customer table are located in SanJose.
 mysql> SELECT  * FROM customers WHERE city='SanJose';
 +------+-----------+---------+--------+------+
@@ -152,8 +157,6 @@ mysql> SELECT  * FROM customers where city = 'SanJose' AND RATING >200;
 +------+-----------+---------+--------+------+
 | 2008 | Cisnerors | SanJose |    300 | 1007 |
 +------+-----------+---------+--------+------+
-
-
 
 12) List the names and commissions of all salespeople in London.
 mysql> SELECT sname,comm FROM salespeople where city='london';
@@ -215,8 +218,6 @@ SELECT * FROM salespeople WHERE EXISTS  (SELECT snum FROM customers WHERE  sales
 | 1002 | Serres | SanJose   |   13 |
 | 1007 | RifKin | Barcelona |   15 |
 +------+--------+-----------+------+
-
-
 18) Find all customers whose cnum is 1000 above the> snum of Serres.
 mysql> SELECT * FROM customers where cnum>1000 and cnum>snum;
 +------+-----------+---------+--------+------+
@@ -245,14 +246,21 @@ mysql> SELECT * FROM customers where cnum>1000 and cnum>snum;
 
 
 20) Find the largest order taken by each salesperson on each date, eliminating those Maximum orders, which are less than 3000.
-
-
-
+mysql> SELECT s.SNUM,MAX(AMT),ODATE FROM orders o,salespeople s WHERE s.SNUM=o.SNUM  GROUP BY ODATE;
++------+----------+------------+
+| SNUM | MAX(AMT) | ODATE      |
++------+----------+------------+
+| 1007 |  5160.45 | 1990-10-03 |
+| 1002 |  1713.23 | 1990-10-04 |
+| 1001 |     4723 | 1990-10-05 |
+| 1002 |  9891.88 | 1990-10-06 |
 
 21) List all the largest orders for October 3, for each salesperson.
+
 mysql> SELECT ONUM,MAX(AMT) ,ODATE ,SNUM FORM orders WHERE ODATE='1990-10-03' GROUP BY SNUM ;
 22) Find all customers located in cities where Serres has customers.
-
+mysql> SELECT SNAME,ODATE FROM salespeople s,orders o WHERE  (SELECT ODATE FROM salespeople 
+WHERE GROUP BY ODATE) AND MAX(AMT) < 3000;
 
 23) Select all customers with a rating above 200.
 > SELECT * FROM customers WHERE RATING>200;
@@ -285,7 +293,18 @@ WHERE salespeople.COMM>12;
 +-----------+--------+------+
 
 26) Find salespeople who have multiple customers.
-
+mysql> SELECT s.SNUM,s.SNAME FROM salespeople s,customers c WHERE s.SNUM=c.SNUM AND c.SNUM>1;
++------+---------+
+| SNUM | SNAME   |
++------+---------+
+| 1001 | Peel    |
+| 1003 | AxelRod |
+| 1002 | Serres  |
+| 1002 | Serres  |
+| 1001 | Peel    |
+| 1004 | Motika  |
+| 1007 | RifKin  |
++------+---------+
 
 27) Find salespeople with customers located in their own cities.
 
@@ -305,7 +324,13 @@ mysql> SELECT * FROM salespeople WHERE SNAME LIKE "P    I%";
 
 
 29) Write a query that uses a subquery to obtain all orders for the customer named ‘Cisneros’. Assume you do not know his customer number.
-
+mysql> SELECT ONUM,ODATE,AMT FROM orders WHERE CNUM = (SELECT CNUM FROM customers  WHERE CNAME = "cisneros");
++------+------------+---------+
+| ONUM | ODATE      | AMT     |
++------+------------+---------+
+| 3001 | 1990-10-03 |   18.69 |
+| 3006 | 1990-10-03 | 1098.16 |
++------+------------+---------+
 
 30) Find the largest orders for Serres and Rifkin.
 mysql> SELECT SNAME , MAX(AMT) FROM salespeople s,orders o 
@@ -346,7 +371,18 @@ mysql> SELECT AMT FROM orders WHERE AMT>(SELECT AVG(AMT) FROM orders WHERE ODATE
 
 35) Write a select command using correlated subquery that selects the names and numbers of all customers with ratings equal to the maximum
 for their city.
-
+mysql> SELECT CNAME,CNUM FROM customers WHERE RATING>= RATING IN(SELECT MAX(RATING) FROM customers GROUP BY CITY) ;
++----------+------+
+| CNAME    | CNUM |
++----------+------+
+| Hoffman  | 2001 |
+| Giovanni | 2002 |
+| Liu      | 2003 |
+| Grass    | 2004 |
+| Clemens  | 2006 |
+| Pereira  | 2007 |
+| Cisneros | 2008 |
++----------+------+
 36) Write a query that totals the orders for each day and places the results in descending order.
 mysql> SELECT ODATE,COUNT(ODATE) FROM orders GROUP BY ODATE ORDER BY COUNT(ONUM) DESC;
 +------------+--------------+
@@ -437,7 +473,18 @@ mysql> SELECT s.SNAME ,s.SNUM FROM salespeople s,(SELECT SNUM ,COUNT(*) as cust_
 +---------+------+
 
 45) Write a query that joins the Customer table to itself to find all pairs or customers served by a single salesperson.
-
+mysql> SELECT CNUM,CNAME,c.CITY,RATING,c.SNUM FROM customers c LEFT JOIN salespeople s ON c.SNUM=s.SNUM WHERE c.SNUM>1;
++------+----------+---------+--------+------+
+| CNUM | CNAME    | CITY    | RATING | SNUM |
++------+----------+---------+--------+------+
+| 2001 | Hoffman  | London  |    100 | 1001 |
+| 2002 | Giovanni | Rome    |    200 | 1003 |
+| 2003 | Liu      | SanJose |    200 | 1002 |
+| 2004 | Grass    | Berlin  |    300 | 1002 |
+| 2006 | Clemens  | Londan  |    100 | 1001 |
+| 2007 | Pereira  | Rome    |    100 | 1004 |
+| 2008 | Cisneros | SanJose |    300 | 1007 |
++------+----------+---------+--------+------+
 46) Write a query that will give you all orders for more than $1000.00.
 mysql> SELECT * FROM orders WHERE AMT>1000;
 +------+---------+------------+------+------+
@@ -540,7 +587,8 @@ mysql> SELECT SNAME ,COMM FROM salespeople;
 
 57) Write a query that produces the names and cities of all customers with the same rating as Hoffman. Write the query using Hoffman’s cnum
 rather than his rating, so that it would still be usable if his rating is changed.
-mysql> SELECT * FROM customers WHERE RATING =(SELECT RATING AS NUM FROM customers WHERE CNAME ="Hoffman");
+mysql> SELECT * FROM customers WHERE RATING =
+(SELECT RATING AS NUM FROM customers WHERE CNAME ="Hoffman");
 +------+---------+--------+--------+------+
 | CNUM | CNAME   | CITY   | RATING | SNUM |
 +------+---------+--------+--------+------+
@@ -593,7 +641,9 @@ mysql> SELECT COUNT(DISTINCT RATING) FROM customers WHERE RATING IS NOT NULL;
 |                      3 |
 +------------------------+
 63) Write a query that gives the names of both the salesperson and the customer for each order after the order number.
-mysql> SELECT ONUM,CNAME,SNAME FROM orders JOIN salespeople ON salespeople.SNUM=orders.SNUM JOIN customers ON customers.CNUM=orders.CNUM;
+mysql> SELECT ONUM,CNAME,SNAME FROM orders 
+JOIN salespeople ON salespeople.SNUM=orders.SNUM
+JOIN customers ON customers.CNUM=orders.CNUM;
 +------+-----------+---------+
 | ONUM | CNAME     | SNAME   |
 +------+-----------+---------+
@@ -609,14 +659,16 @@ mysql> SELECT ONUM,CNAME,SNAME FROM orders JOIN salespeople ON salespeople.SNUM=
 | 3006 | Cisnerors | RifKin  |
 +------+-----------+---------+
 64) List the commissions of all salespeople servicing customers in London.
-mysql> SELECT s.SNUM,SNAME FROM salespeople s INNER JOIN customers c ON s.SNUM=c.SNUM WHERE c.CITY="London";
+mysql> SELECT s.SNUM,SNAME FROM salespeople s 
+INNER JOIN customers c ON s.SNUM=c.SNUM WHERE c.CITY="London";
 +------+-------+
 | SNUM | SNAME |
 +------+-------+
 | 1001 | Peel  |
 +------+-------+
 65) Write a query using ANY or ALL that will find all salespeople who have no customers located in their city.
-mysql> SELECT s.SNUM,SNAME FROM salespeople s INNER JOIN customers c ON s.SNUM=c.SNUM WHERE c.CITY IS NULL;
+mysql> SELECT s.SNUM,SNAME FROM salespeople s 
+INNER JOIN customers c ON s.SNUM=c.SNUM WHERE c.CITY IS NULL;
 Empty set (0.00 sec)
 66) Write a query using the EXISTS operator that selects all salespeople with customers located in their cities who are not assigned to them.
 67) Write a query that selects all customers serviced by Peel or Motika. (Hint: The snum field relates the 2 tables to one another.)
@@ -632,11 +684,13 @@ mysql> SELECT * FROM customers c INNER JOIN salespeople s ON c.SNUM= s.SNUM WHER
 
 68) Count the number of salespeople registering orders for each day. (If a salesperson has more than one order on a given day, he or she should
 be counted only once.)
-mysql> SELECT COUNT(SNUM) FROM salepeopele (SELECT SNUM FROM customers WHERE ODATE IN GROUP BY ODATE;
+mysql> SELECT COUNT(SNUM) FROM salepeopele
+(SELECT SNUM FROM customers WHERE ODATE IN GROUP BY ODATE;
 
 69) Find all orders attributed to salespeople who live in London.
 
-mysql> SELECT o.ONUM,AMT,o.ODATE,o.SNUM,s.SNAME FROM orders o JOIN salespeople s ON o.SNUM=s.SNUM WHERE s.CITY="london";
+mysql> SELECT o.ONUM,AMT,o.ODATE,o.SNUM,s.SNAME FROM orders o
+JOIN salespeople s ON o.SNUM=s.SNUM WHERE s.CITY="london";
 +------+---------+------------+------+--------+
 | ONUM | AMT     | ODATE      | SNUM | SNAME  |
 +------+---------+------------+------+--------+
@@ -656,7 +710,10 @@ mysql> SELECT ONUM,s.SNUM,s.SCITY As salespeople s,c.CITY AS c.CITY FROM orders 
 JOIN salespeolpe s ON s.SNUM=o.SNUM JOIN customers c ON o.CNUM =c.CNUM 
 WHERE s.CITY <> c.CITY;
 71) Find all salespeople who have customers with more than one current order.
-mysql> SELECT s.SNUM,s.SNAME,s.CITY FROM salespeople s INNER JOIN customers c ON s.SNUM=c.SNUM INNER JOIN orders o ON o.CNUM=c.CNUM where 1<=o.CNUM;
+mysql> SELECT s.SNUM,s.SNAME,s.CITY FROM salespeople s 
+INNER JOIN customers c ON s.SNUM=c.SNUM 
+INNER JOIN orders o ON o.CNUM=c.CNUM 
+where 1<=o.CNUM;
 +------+---------+-----------+
 | SNUM | SNAME   | CITY      |
 +------+---------+-----------+
@@ -700,7 +757,8 @@ mysql> SELECT CITY ,MAX(RATING) FROM customers GROUP BY CITY;
 | Londan  |         100 |
 74) Write a query that will produce the snum values of all salespeople with orders, having amt greater than 1000 in the Orders Table(without
 repeats).
-mysql> SELECT DISTINCT ONUM ,s.SNUM,AMT FROM salespeople s JOIN orders o ON s.SNUM=o.SNUM WHERE AMT>1000;
+mysql> SELECT DISTINCT ONUM ,s.SNUM,AMT FROM salespeople s 
+JOIN orders o ON s.SNUM=o.SNUM WHERE AMT>1000;
 +------+------+---------+
 | ONUM | SNUM | AMT     |
 +------+------+---------+
@@ -713,7 +771,8 @@ mysql> SELECT DISTINCT ONUM ,s.SNUM,AMT FROM salespeople s JOIN orders o ON s.SN
 | 3011 | 1001 | 9891.88 |
 +------+------+---------+
 75) Write a query that lists customers in a descending order of rating. Output the rating field first, followed by the customer’s names and numbers.
-mysql> SELECT CNAME,CNUM,RATING FROM customers ORDER BY RATING DESC;
+mysql> SELECT CNAME,CNUM,RATING FROM customers 
+ORDER BY RATING DESC;
 +-----------+------+--------+
 | CNAME     | CNUM | RATING |
 +-----------+------+--------+
@@ -765,7 +824,8 @@ mysql> SELECT SNAME,CITY ,COMM FROM salespeople WHERE CITY="london" AND COMM>10;
 | Fran   | London |   25 |
 +--------+--------+------+
 80) Write a query that selects each customer’s smallest order.
-mysql> SELECT C.CNUM, CNAME,MIN(AMT) FROM customers c INNER JOIN orders o ON c.CNUM=o.CNUM GROUP BY CNUM;
+mysql> SELECT C.CNUM, CNAME,MIN(AMT) FROM customers c 
+INNER JOIN orders o ON c.CNUM=o.CNUM GROUP BY CNUM;
 +------+-----------+----------+
 | CNUM | CNAME     | MIN(AMT) |
 +------+-----------+----------+
@@ -861,7 +921,8 @@ mysql> SELECT SNUM,SNAME,CITY,MAX(COMM) FROM salespeople ;
 | 1001 | Peel  | London |        25 |
 +------+-------+--------+-----------+
 90) Does the customer who has placed the maximum number of orders have the maximum rating?
-mysql> SELECT c.CNUM,CNAME,CITY,COUNT(o.CNUM),MAX(RATING) FROM customers c JOIN orders o ON o.CNUM= c.CNUM ;
+mysql> SELECT c.CNUM,CNAME,CITY,COUNT(o.CNUM),MAX(RATING) FROM customers c 
+JOIN orders o ON o.CNUM= c.CNUM ;
 +------+---------+--------+---------------+-------------+
 | CNUM | CNAME   | CITY   | COUNT(o.CNUM) | MAX(RATING) |
 +------+---------+--------+---------------+-------------+
@@ -1011,9 +1072,10 @@ more than 5 times?
 106) Which are the date, order number, amt and city for each salesperson (by name) for the maximum order he has obtained?
 
 107) Which salesperson is having lowest commission? 
-mysql> SELECT SNUM,SNAME,CITY,MIN(COMM) FROM salespeople;
-+------+-------+--------+-----------+
-| SNUM | SNAME | CITY   | MIN(COMM) |
-+------+-------+--------+-----------+
-| 1001 | Peel  | London |        10 |
-+------+-------+--------+-----------+
+mysql> SELECT SNAME,COMM FROM Salespeople
+    -> WHERE COMM=(SELECT min(COMM) FROM Salespeople);
++---------+------+
+| SNAME   | COMM |
++---------+------+
+| AxelRod |   10 |
++---------+------+
