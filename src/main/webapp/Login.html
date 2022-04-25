@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>login</title>
+<style type="text/css">
+
+body { background-image: url('background.jpg');
+background-repeat: no-repeat;
+  background-attachment: fixed;  
+  background-size: cover;
+}
+table {
+margin-top:auto;
+
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom:auto;
+}
+</style>
+</head>
+<body>
+<form action="ServletLogin" method ="post">
+
+<div style="   text-align: center;margin-top: 15%;">
+<table>
+<h5 style="font-family: serif; text-align:center;">User login</h5>
+<tr><td>Email  </td><td><input type="email" name="username" required> </td> </tr>
+<tr><td>Password  </td><td><input type="password" name="password" required> </td> </tr>
+<tr><td><input type="submit" name="submit" value="login" > 
+</td><td><a href="register.html">User Register</a> </td> 
+
+<td><a href="adminlogin.html">Admin</a> </td> 
+
+
+</table>
+</div>
+</form>
+</body>
+</html>
